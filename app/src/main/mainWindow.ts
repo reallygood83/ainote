@@ -321,12 +321,15 @@ export function createWindow() {
     callback({ cancel: false })
   })
 
+  console.log('🔍 [MAIN] Registering protocol handlers...')
   try {
     webviewSession.protocol.handle('surf', surfProtocolHandler)
     webviewSession.protocol.handle('surflet', surfletProtocolHandler)
     mainWindowSession.protocol.handle('surf', surfProtocolHandler)
     mainWindowSession.protocol.handle('surf-internal', surfInternalProtocolHandler)
+    console.log('✅ [MAIN] Protocol handlers registered successfully')
   } catch (e) {
+    console.error('❌ [MAIN] Failed to register surf protocol:', e)
     log.error('possibly failed to register surf protocol: ', e)
   }
 
@@ -386,6 +389,24 @@ export function createWindow() {
   // } else {
   //   mainWindow.loadFile(join(__dirname, '../renderer/Core/core.html'))
   // }
+
+  console.log('🔍 [MAIN] Loading URL: surf-internal://core/Core/core.html')
+
+  // Add event listeners for debugging
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    console.error('❌ [MAIN] Page load failed!')
+    console.error('  Error code:', errorCode)
+    console.error('  Error description:', errorDescription)
+    console.error('  URL:', validatedURL)
+  })
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    console.log('✅ [MAIN] Page loaded successfully')
+  })
+
+  mainWindow.webContents.on('dom-ready', () => {
+    console.log('✅ [MAIN] DOM is ready')
+  })
 
   mainWindow.loadURL('surf-internal://core/Core/core.html')
 }

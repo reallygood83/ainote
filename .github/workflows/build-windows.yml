@@ -1,0 +1,79 @@
+name: Build Windows
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'yarn'
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: x86_64-pc-windows-msvc
+
+      - name: Install Yarn
+        run: npm install -g yarn
+
+      - name: Install root dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Install app dependencies
+        working-directory: ./app
+        run: yarn install --frozen-lockfile
+
+      - name: Build Windows x64
+        working-directory: ./app
+        run: npm run build:win:x64
+
+      - name: List build output
+        working-directory: ./app
+        run: |
+          echo "Build output files:"
+          dir dist
+
+      - name: Upload Windows build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64-build
+          path: app/dist/*.exe
+          retention-days: 7
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            app/dist/*.exe
+            app/dist/*.exe.blockmap
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post-build summary
+        if: always()
+        run: |
+          echo "### Build Summary 📊" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platform:** Windows x64" >> $GITHUB_STEP_SUMMARY
+          echo "- **Node.js:** 22.x" >> $GITHUB_STEP_SUMMARY
+          echo "- **Rust:** stable (x86_64-pc-windows-msvc)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY

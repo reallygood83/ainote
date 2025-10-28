@@ -296,28 +296,41 @@ export const serveFile = async (req: Request, targetPath: string) => {
 }
 
 export const handleSurfFileRequest = async (req: GlobalRequest) => {
+  console.log('🔍 [SURF] Request received:', req.url)
+
   try {
     const url = new URL(req.url)
+    console.log('🔍 [SURF] Protocol:', url.protocol)
+    console.log('🔍 [SURF] Hostname:', url.hostname)
+    console.log('🔍 [SURF] Pathname:', url.pathname)
 
     if (url.protocol !== 'surf-internal:' && url.protocol !== 'surf:') {
+      console.error('❌ [SURF] Invalid protocol:', url.protocol)
       log.error('Invalid protocol:', url.protocol)
       return new Response('Invalid Surf protocol URL', { status: 400 })
     }
 
     if (!ALLOWED_HOSTNAMES.includes(url.hostname.toLowerCase())) {
+      console.error('❌ [SURF] Invalid hostname:', url.hostname)
+      console.error('❌ [SURF] Allowed hostnames:', ALLOWED_HOSTNAMES)
       log.error('Invalid hostname:', url.hostname)
       return new Response('Invalid Surf internal protocol hostname', { status: 400 })
     }
 
     let targetPath = url.pathname
+    console.log('🔍 [SURF] Initial target path:', targetPath)
     if (targetPath === '/') {
+      console.log('🔍 [SURF] Root path requested, looking up hostname:', url.hostname)
       const rootPath = HOSTNAME_TO_ROOT[url.hostname as keyof typeof HOSTNAME_TO_ROOT]
+      console.log('🔍 [SURF] Found root path:', rootPath)
       if (!rootPath) {
+        console.error('❌ [SURF] Invalid hostname for root path:', url.hostname)
         log.error('Invalid hostname for root path:', url.hostname)
         return new Response('Invalid Surf internal protocol hostname', { status: 400 })
       }
 
       targetPath = rootPath
+      console.log('🔍 [SURF] Updated target path to root:', targetPath)
     } else if (url.hostname === 'surf') {
       // Handle root requests (surf://surf/notebook/:id) and root assets
       const match = url.pathname.match(/^\/(notebook|resource)(?:\/([^\/]+))?\/?$/)
@@ -364,8 +377,14 @@ export const handleSurfFileRequest = async (req: GlobalRequest) => {
       }
     }
 
-    return serveFile(req, targetPath)
+    console.log('🔍 [SURF] Final target path before serveFile:', targetPath)
+    console.log('🔍 [SURF] Calling serveFile...')
+    const response = await serveFile(req, targetPath)
+    console.log('✅ [SURF] serveFile completed successfully')
+    return response
   } catch (err) {
+    console.error('❌ [SURF] Error in handleSurfFileRequest:', err)
+    console.error('❌ [SURF] Request URL:', req.url)
     log.error('surf internal protocol error:', err, req.url)
     return new Response('Internal Server Error', { status: 500 })
   }

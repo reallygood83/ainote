@@ -91,7 +91,7 @@ function electronBuilderConfig() {
       artifactName: `${params.buildName}-${params.appVersion}.\${arch}.\${ext}`,
       category: 'WebBrowser'
     },
-    npmRebuild: false,
+    npmRebuild: true,
     fileAssociations: [
       {
         name: 'Hypertext Markup Language',
