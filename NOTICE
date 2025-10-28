@@ -1,0 +1,85 @@
+배움의 달인 (Learning Master)
+Copyright 2025 김문정
+
+This product is a derivative work based on Deta Surf, which is:
+Copyright 2025 Deta GmbH
+
+Original work licensed under the Apache License, Version 2.0.
+See LICENSE file for full license text.
+
+================================================================================
+
+MODIFICATIONS TO ORIGINAL WORK
+
+This derivative work includes the following modifications:
+
+1. Application Renaming
+   - Changed product name from "Surf" to "배움의 달인" (Learning Master)
+   - Updated all branding, metadata, and documentation
+   - Files modified: app/package.json, app/build/electron-builder-config.js
+
+2. Korean Language Support (i18n System)
+   - Created comprehensive internationalization system
+   - Added 200+ Korean translation strings
+   - Files created:
+     * app/src/i18n/index.ts
+     * app/src/i18n/locales/ko.json
+     * app/src/i18n/locales/en.json
+   - Files modified: app/src/lib/stores/settings.svelte.ts
+
+3. Multi-Provider AI Integration (BYOK System)
+   - Implemented Bring Your Own Key (BYOK) system for multiple AI providers
+   - Added support for Google Gemini, OpenAI, Anthropic, and Custom APIs
+   - Files created:
+     * app/src/lib/ai-config.ts
+     * app/src/lib/ai-service.ts
+     * app/src/components/settings/AISettings.svelte
+   - Integrated user-selectable AI models with detailed specifications
+
+4. GitHub Actions Workflow Modification
+   - Modified automated build and release workflow
+   - Updated default product name in workflow triggers
+   - Files modified: .github/workflows/release.yml
+
+5. Documentation
+   - Created Korean documentation files
+   - Added deployment guides and project summaries
+   - Files created:
+     * README.ko.md
+     * DEPLOYMENT_GUIDE_KR.md
+     * PROJECT_SUMMARY_KR.md
+
+================================================================================
+
+TRADEMARK NOTICE
+
+This derivative work does NOT use the "Deta" name or logos.
+The original "Deta" name and logos are trademarks of Deta GmbH and are not
+covered by the Apache 2.0 license.
+
+This derivative work is branded as "배움의 달인" (Learning Master) and does not
+claim any association with or endorsement by Deta GmbH.
+
+================================================================================
+
+THIRD-PARTY COMPONENTS
+
+This product includes third-party open source software components.
+See the original Deta Surf acknowledgements in README.md for a full list.
+
+Additional components added in this derivative work:
+- Google Generative AI SDK (for Gemini API integration)
+
+================================================================================
+
+LICENSE COMPLIANCE
+
+This derivative work complies with the Apache License 2.0 requirements:
+
+1. License Copy: The original LICENSE file is included and unmodified
+2. Modification Notice: This NOTICE file documents all modifications
+3. Attribution: Original copyright notices are retained
+4. Trademark: "Deta" trademarks are not used in this derivative work
+
+For questions about this derivative work, contact: 김문정
+For questions about the original Deta Surf, see: https://github.com/deta/surf
