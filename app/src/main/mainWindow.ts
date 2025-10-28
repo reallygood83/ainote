@@ -387,7 +387,7 @@ export function createWindow() {
   //   mainWindow.loadFile(join(__dirname, '../renderer/Core/core.html'))
   // }
 
-  mainWindow.loadURL('surf-internal://Core/Core/core.html')
+  mainWindow.loadURL('surf-internal://core/Core/core.html')
 }
 
 export function getMainWindow(): BrowserWindow | undefined {
