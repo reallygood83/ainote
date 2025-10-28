@@ -28,6 +28,11 @@
       "outputs": ["dist/**"],
       "outputLogs": "new-only"
     },
+    "@deta/teletype#build": {
+      "dependsOn": ["@deta/ui#build", "@deta/editor#build"],
+      "outputs": ["dist/**"],
+      "outputLogs": "new-only"
+    },
     "@deta/backend#build": {
       "cache": false
     },
