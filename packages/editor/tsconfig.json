@@ -23,8 +23,8 @@
 		"moduleResolution": "bundler",
 		"module": "esnext",
 		"verbatimModuleSyntax": true,
-		"noUncheckedIndexedAccess": true,
-		"erasableSyntaxOnly": true
+		"noUncheckedIndexedAccess": true
+		// "erasableSyntaxOnly": true  // Commented out - requires TypeScript 5.5+ (not available in CI)
 	},
   "include": [
 		"ambient.d.ts",
