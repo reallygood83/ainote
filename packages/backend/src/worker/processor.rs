@@ -11,8 +11,12 @@ use crate::{
     BackendError, BackendResult,
 };
 
+// OCR imports: Windows/Linux에서만 포함
+#[cfg(not(target_os = "macos"))]
 use ocrs::{ImageSource, OcrEngine, OcrEngineParams};
+#[cfg(not(target_os = "macos"))]
 use rten::Model;
+
 use serde::{Deserialize, Serialize};
 use serde_yaml;
 
@@ -24,17 +28,24 @@ mod resource_types {
 
 pub struct Processor {
     tunnel: WorkerTunnel,
+    #[cfg(not(target_os = "macos"))]
     ocr_engine: Option<OcrEngine>,
     language: Option<String>,
 }
 
 impl Processor {
     pub fn new(tunnel: WorkerTunnel, app_path: String, language: Option<String>) -> Self {
+        #[cfg(not(target_os = "macos"))]
         let ocr_engine = create_ocr_engine(&app_path)
             .map_err(|e| tracing::error!("failed to create the OCR engine: {e}"))
             .ok();
+
+        #[cfg(target_os = "macos")]
+        let _ = app_path; // macOS에서는 OCR 엔진을 사용하지 않으므로 app_path도 사용 안 함
+
         Self {
             tunnel,
+            #[cfg(not(target_os = "macos"))]
             ocr_engine,
             language,
         }
@@ -114,8 +125,13 @@ impl Processor {
 
         match resource.resource.resource_type.as_str() {
             t if t.starts_with("image/") => {
+                #[cfg(not(target_os = "macos"))]
+                let ocr_ref = self.ocr_engine.as_ref();
+                #[cfg(target_os = "macos")]
+                let ocr_ref = None;
+
                 if let Some((content_type, content)) =
-                    process_resource_data(&resource, "", self.ocr_engine.as_ref())?
+                    process_resource_data(&resource, "", ocr_ref)?
                 {
                     result.insert(
                         content_type,
@@ -157,8 +173,14 @@ impl Processor {
             }
             _ => {
                 let resource_data = std::fs::read_to_string(&resource.resource.resource_path)?;
+
+                #[cfg(not(target_os = "macos"))]
+                let ocr_ref = self.ocr_engine.as_ref();
+                #[cfg(target_os = "macos")]
+                let ocr_ref = None;
+
                 if let Some((content_type, content)) =
-                    process_resource_data(&resource, &resource_data, self.ocr_engine.as_ref())?
+                    process_resource_data(&resource, &resource_data, ocr_ref)?
                 {
                     result.insert(
                         content_type,
@@ -206,6 +228,8 @@ pub fn processor_thread_entry_point(
     processor.run();
 }
 
+// OCR 엔진 생성: Windows/Linux에서만 컴파일
+#[cfg(not(target_os = "macos"))]
 fn create_ocr_engine(app_path: &str) -> Result<OcrEngine, Box<dyn std::error::Error>> {
     // TODO: not have the env var here
     let ocrs_folder = std::env::var("SURF_OCRS_FOLDER").unwrap_or(
@@ -318,7 +342,10 @@ pub fn get_youtube_contents_metadatas(
 fn process_resource_data(
     resource: &CompositeResource,
     resource_data: &str,
+    #[cfg(not(target_os = "macos"))]
     ocr_engine: Option<&OcrEngine>,
+    #[cfg(target_os = "macos")]
+    ocr_engine: Option<()>,  // macOS에서는 사용하지 않음
 ) -> BackendResult<Option<(ResourceTextContentType, String)>> {
     let resource_text_content_type =
         ResourceTextContentType::from_resource_type(&resource.resource.resource_type)
@@ -459,21 +486,35 @@ fn normalize_html_data(data: &str) -> String {
 
 fn extract_text_from_image(
     image_path: &str,
+    #[cfg(not(target_os = "macos"))]
     engine: Option<&OcrEngine>,
+    #[cfg(target_os = "macos")]
+    engine: Option<()>,
 ) -> Result<Option<String>, Box<dyn std::error::Error>> {
-    if let Some(engine) = engine {
-        let img = image::ImageReader::open(image_path)?
-            .with_guessed_format()?
-            .decode()
-            .map(|image| image.into_rgb8())?;
-        let img_source = ImageSource::from_bytes(img.as_raw(), img.dimensions())?;
-
-        let ocr_input = engine.prepare_input(img_source)?;
-        let ocr_text = engine.get_text(&ocr_input)?;
-
-        Ok(Some(ocr_text.trim().to_owned()))
-    } else {
+    // macOS: OCR 비활성화 (서명되지 않은 Rust 네이티브 모듈 크래시 방지)
+    #[cfg(target_os = "macos")]
+    {
+        let _ = (image_path, engine); // unused variable warning 방지
         Ok(None)
+    }
+
+    // Windows/Linux: OCR 정상 작동
+    #[cfg(not(target_os = "macos"))]
+    {
+        if let Some(engine) = engine {
+            let img = image::ImageReader::open(image_path)?
+                .with_guessed_format()?
+                .decode()
+                .map(|image| image.into_rgb8())?;
+            let img_source = ImageSource::from_bytes(img.as_raw(), img.dimensions())?;
+
+            let ocr_input = engine.prepare_input(img_source)?;
+            let ocr_text = engine.get_text(&ocr_input)?;
+
+            Ok(Some(ocr_text.trim().to_owned()))
+        } else {
+            Ok(None)
+        }
     }
 }
 

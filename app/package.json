@@ -22,7 +22,7 @@
     "build:mac:arm": "npm run build && electron-builder --mac --config build/electron-builder-config.js --arm64 --publish always",
     "build:lin:x64": "npm run build && electron-builder --linux --config build/electron-builder-config.js --x64 --publish always",
     "build:lin:arm": "npm run build && electron-builder --linux --config build/electron-builder-config.js --arm64 --publish always",
-    "build:win:x64": "npm run build && electron-builder --win --config build/electron-builder-config.js --x64 --publish always"
+    "build:win:x64": "npm run build && electron-builder --win --config build/electron-builder-config.js --x64 --publish never"
   },
   "dependencies": {
     "@deta/backend": "*",

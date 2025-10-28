@@ -37,14 +37,17 @@ unicode-normalization = "0.1.23"
 strum_macros = "0.26.4"
 ytranscript = "0.1.0"
 html-escape = "0.2.13"
-ocrs = "0.8.1"
-rten = "0.13.1"
-image = "0.25.2"
 mime = "0.3.17"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
 uds_windows = "1.1.0"
 mime2ext = "0.1.54"
+
+# OCR 의존성: Windows/Linux에서만 포함 (macOS는 서명 문제로 제외)
+[target.'cfg(not(target_os = "macos"))'.dependencies]
+ocrs = "0.8.1"
+rten = "0.13.1"
+image = "0.25.2"
 
 [dependencies.neon]
 version = "1.1.1"
