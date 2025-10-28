@@ -13,7 +13,8 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "declaration": true
+    "declaration": true,
+    "erasableSyntaxOnly": false  // Explicitly disable TypeScript 5.5+ option for CI compatibility
   },
   "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
   "references": [{ "path": "./tsconfig.node.json" }]
