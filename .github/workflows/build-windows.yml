@@ -34,6 +34,12 @@ jobs:
       - name: Install root dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Build packages (@deta/utils, @deta/backend, etc.)
+        run: yarn build:packages
+
+      - name: Build libs
+        run: yarn build:libs
+
       - name: Install app dependencies
         working-directory: ./app
         run: yarn install --frozen-lockfile
